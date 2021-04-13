@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+
+    android:layout_height="120dp"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="#FFFFFFFF"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="5dp"
+            app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:id="@+id/re_back"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                                <TextView
+                                    android:id="@+id/txtBl"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="BL"
+
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                                <TextView
+                                    android:id="@+id/txtRemark"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="0.8"
+                                    android:gravity="center"
+                                    android:hint="비고란"
+                                    android:textColor="#FF0000"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/txtDate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="반입일"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                                <TextView
+                                    android:id="@+id/txtCount"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="찻수"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/txtDes"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="품명"
+
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/txtPlt"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="재고PLT"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                                <TextView
+                                    android:id="@+id/txtCbm"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="재고CBM"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                                <TextView
+                                    android:id="@+id/txtQty"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:hint="재고수량"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold|italic" />
+
+                                <TextView
+                                    android:id="@+id/txtLocation"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="0.9"
+                                    android:gravity="center"
+                                    android:hint="로케이션" />
+                        </LinearLayout>
+
+                </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+</LinearLayout>

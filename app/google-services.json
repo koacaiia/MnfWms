@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "242648487912",
+    "project_id": "fine2database",
+    "storage_bucket": "fine2database.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242648487912:android:9b0d2e689d8446757c365d",
+        "android_client_info": {
+          "package_name": "fine.koacaiia.mnfwms"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "242648487912-s8a5krq7m2ts4c1re3pp8n5f2lq1mvsf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsJ-svDGc4YbGFnf9JUniIJqU5KtuSfUI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "242648487912-s8a5krq7m2ts4c1re3pp8n5f2lq1mvsf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
