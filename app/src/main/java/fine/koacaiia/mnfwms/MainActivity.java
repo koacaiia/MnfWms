@@ -1,14 +1,20 @@
 package fine.koacaiia.mnfwms;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,7 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MnfCargoListAdapter.itemClicked {
     RecyclerView recyclerView;
     ArrayList<MnfCargoList> list;
     MnfCargoListAdapter adapter;
@@ -44,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         database=FirebaseDatabase.getInstance();
 //        putData();
         getData();
-        adapter=new MnfCargoListAdapter(list);
+        adapter=new MnfCargoListAdapter(list,this);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
         txtPlt=findViewById(R.id.txtResultPlt);
@@ -111,5 +117,30 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         databaseReference.addListenerForSingleValueEvent(listener);
+    }
+
+    @Override
+    public void itemOnClick(MnfCargoListAdapter.ListViewHolder listviewholder, View v, int pos) {
+//        String item=list.get(pos).getDes();
+//        Toast.makeText(this,"Item Clicked"+item,Toast.LENGTH_SHORT).show();
+        dialogItem();
+    }
+
+    private void dialogItem() {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this  );
+        builder.setTitle("Manage Control!")
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplication(),"Alert Dialog Init",Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

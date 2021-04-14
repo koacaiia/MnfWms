@@ -13,8 +13,14 @@ import java.util.ArrayList;
 public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapter.ListViewHolder> {
     ArrayList<MnfCargoList> list;
 
-    public MnfCargoListAdapter(ArrayList<MnfCargoList> list){
+    public interface itemClicked{
+        void itemOnClick(ListViewHolder listviewholder,View v,int pos);
+    }
+    itemClicked listener;
+
+    public MnfCargoListAdapter(ArrayList<MnfCargoList> list,itemClicked listener){
         this.list=list;
+        this.listener=listener;
     }
     @NonNull
     @Override
@@ -63,6 +69,13 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
             this.cbm=itemView.findViewById(R.id.txtCbm);
             this.qty=itemView.findViewById(R.id.txtQty);
             this.location=itemView.findViewById(R.id.txtLocation);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.itemOnClick(ListViewHolder.this,v,getAdapterPosition());
+                }
+            });
         }
     }
 }
