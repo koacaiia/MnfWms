@@ -6,13 +6,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,10 +42,28 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     int intPlt,intCbm,intQty;
     ArrayList<String> desList;
 
+    static private final String SHARE_NAME="SHARE_DEPOT";
+    static SharedPreferences sharedPref;
+    static SharedPreferences.Editor editor;
+
+    String depotName;
+    String nickName;
+
+    String bl;
+    String des;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPref=getSharedPreferences(SHARE_NAME,MODE_PRIVATE);
+        if(sharedPref==null){
+            depotName="FineTrading";
+            nickName="FineTrading Staff";
+        }else{
+            depotName=sharedPref.getString("depotName","FineTrading");
+            nickName=sharedPref.getString("nickName","FineTrading Staff");
+        }
 
         recyclerView=findViewById(R.id.recyclerView);
         LinearLayoutManager manager=new LinearLayoutManager(this);
@@ -103,11 +126,14 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
                 }
 
-
-
-                txtPlt.setText(String.valueOf(intPlt)+" PlT");
+                txtPlt.setText(String.valueOf(intPlt)+" PLT");
                 txtCbm.setText(String.valueOf(intCbm)+" CBM");
-//                txtQty.setText(String.valueOf(intQty));
+                txtQty.setText(String.valueOf(intQty));
+                String toDay=new SimpleDateFormat("yyyy년MM월dd일").format(new Date());
+                DatabaseReference dataReference=database.getReference("MnF&StockTotal/"+toDay);
+                MnfStockList mnfStockList=new MnfStockList(toDay,String.valueOf(intPlt),String.valueOf(intCbm));
+                dataReference.setValue(mnfStockList);
+
                 adapter.notifyDataSetChanged();
             }
 
@@ -121,26 +147,212 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
     @Override
     public void itemOnClick(MnfCargoListAdapter.ListViewHolder listviewholder, View v, int pos) {
-//        String item=list.get(pos).getDes();
-//        Toast.makeText(this,"Item Clicked"+item,Toast.LENGTH_SHORT).show();
-        dialogItem();
+
+        bl=list.get(pos).getBl();
+        des=list.get(pos).getDes();
+        MnfCargoList mnfCargoList=new MnfCargoList();
+        mnfCargoList=list.get(pos);
+        switch(depotName){
+            case "ComanFood":
+                alertComan(mnfCargoList);
+                break;
+            case "M&F":
+                Toast.makeText(this,"Not Yet",Toast.LENGTH_SHORT).show();
+                break;
+            case "FineTrading":
+                alertFine(mnfCargoList);
+                break;
+        }
+
     }
 
-    private void dialogItem() {
-        AlertDialog.Builder builder=new AlertDialog.Builder(this  );
-        builder.setTitle("Manage Control!")
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplication(),"Alert Dialog Init",Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .show();
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater=getMenuInflater();
         inflater.inflate(R.menu.main_menu,menu);
         return super.onCreateOptionsMenu(menu);
+    }
+    @SuppressLint("NonConstantResourcedId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+      editor=sharedPref.edit();
+
+      switch(item.getItemId()){
+          case R.id.action_account:
+              putRegistName();
+
+              break;
+          case R.id.action_account_down:
+//             selectDialog();
+              totalIntent();
+              break;
+          case R.id.action_account_search:
+              if(bl==null){
+                  Toast.makeText(this,"화물조회 항목 비엘 다시 한번 확인 바랍니다.",Toast.LENGTH_SHORT).show();
+              }else{
+                  Toast.makeText(this,"비엘:"+bl+" 이 선택 되었습니다.",Toast.LENGTH_SHORT).show();
+                  webview(bl);
+              }
+
+              break;
+      }
+
+    return true;
+    }
+
+    private void totalIntent() {
+        Intent intent=new Intent(MainActivity.this,StockTotalData.class);
+        startActivity(intent);
+    }
+
+    private void webview(String bl) {
+        Intent intent=new Intent(MainActivity.this,WebList.class);
+        intent.putExtra("bl",bl);
+        intent.putExtra("des",des);
+        startActivity(intent);
+    }
+
+    private void putRegistName() {
+        ArrayList<String> arrListDepotName=new ArrayList<>();
+        arrListDepotName.add("ComanFood");
+        arrListDepotName.add("M&F");
+        arrListDepotName.add("FineTrading");
+
+        String[] arrDepotName=arrListDepotName.toArray(new String[arrListDepotName.size()]);
+        View view=getLayoutInflater().inflate(R.layout.user_reg,null);
+        EditText reg_edit=view.findViewById(R.id.user_reg_Edit);
+        Button reg_button=view.findViewById(R.id.user_reg_button);
+        TextView reg_depot=view.findViewById(R.id.user_reg_depot);
+
+        reg_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nickName=reg_edit.getText().toString();
+                reg_depot.setText(depotName+"_"+nickName+"으로 사용자 등록을"+"\n"+"진행할려면 하단 Confirm 버튼을 클릭 바랍니다.");
+            }
+        });
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setView(view)
+                .setSingleChoiceItems(arrDepotName,0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        depotName=arrDepotName[which];
+                        reg_depot.setText("부서명_"+depotName+"로 확인");
+                    }
+                })
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editor.putString("depotName",depotName);
+                        editor.putString("nickName",nickName);
+                        editor.apply();
+                        Toast.makeText(getApplicationContext(),depotName+"_"+nickName+"로 사용자 등록 성공 하였습니다.!",Toast.LENGTH_SHORT).show();
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+    }
+    public void alertComan(MnfCargoList mnfCargoList){
+        ArrayList<String > coman=new ArrayList<>();
+        coman.add("검역 신청");
+        coman.add("검역 중");
+        coman.add("식약처 검채 건");
+        coman.add("검역 완료");
+        coman.add("수입신고 신청");
+        coman.add("수입신고 검사 선별건");
+        coman.add("수입신고 수리 완료");
+
+
+        String[] arrComan=coman.toArray(new String[coman.size()]);
+        String[] comanProcess = new String[1];
+        String childPath=
+                "MnF/"+mnfCargoList.getDate()+"_"+mnfCargoList.getBl()+"_"+mnfCargoList.getDes()+"_"+mnfCargoList.getCount();
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+                builder.setTitle("Coman Process")
+                        .setSingleChoiceItems(arrComan, 0, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                             comanProcess[0] =arrComan[which];
+                              Toast.makeText(getApplicationContext(),depotName+""+ comanProcess[0] +"으로 업무 전달 진행 됩니다.",
+                                      Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setPositiveButton("Share", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mnfCargoList.setRemark(comanProcess[0]);
+                                DatabaseReference databaseReference=database.getReference(childPath);
+                                databaseReference.setValue(mnfCargoList);
+                                getData();
+                            }
+                        })
+                        .show();
+    }
+
+    public void alertFine(MnfCargoList mnfCargoList){
+        ArrayList<String> arrListFine=new ArrayList<>();
+        arrListFine.add("보세화물 반입 진행");
+        arrListFine.add("식약처 검채 확인");
+        arrListFine.add("수입신고 검사 확인");
+        String[] arrFine = arrListFine.toArray(new String[arrListFine.size()]);
+        String finePath=
+                "MnF/"+mnfCargoList.getDate()+"_"+mnfCargoList.getBl()+"_"+mnfCargoList.getDes()+"_"+mnfCargoList.getCount();
+        final String[] itemName = new String[1];
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("FineTrading Progress")
+                .setSingleChoiceItems(arrFine,0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                          itemName[0] =arrFine[which];
+                    }
+                })
+                .setPositiveButton("Share", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            DatabaseReference databaseReference=database.getReference(finePath);
+                            mnfCargoList.setRemark(itemName[0]);
+                            databaseReference.setValue(mnfCargoList);
+                            getData();
+                    }
+                })
+                .show();
+
+
+    }
+    public void selectDialog(){
+        ArrayList<String> arrListDepotName=new ArrayList<>();
+        arrListDepotName.add("ComanFood");
+        arrListDepotName.add("M&F");
+        arrListDepotName.add("FineTrading");
+
+        String[] arrDepotName=arrListDepotName.toArray(new String[arrListDepotName.size()]);
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setSingleChoiceItems(arrDepotName,0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String depotName=arrDepotName[which];
+                String depotNameSortArrayList=arrListDepotName.get(which);
+                Log.i("koacaiia","depotNameSortArrayList"+depotNameSortArrayList);
+                switch(depotName){
+//                    case "ComanFood":
+//                        alertComan(mnfCargoList);
+//                        break;
+//                    case "FineTrading":
+//                        alertFine(mnfCargoList);
+//                        break;
+                }
+            }
+        })
+                .show();
+    }
+    public void alarmProcess(String depotName,String nickName,String workProcess){
+
     }
 }

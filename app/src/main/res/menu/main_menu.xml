@@ -12,7 +12,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/action_account_down"
-        android:icon="@android:drawable/arrow_down_float"
+        android:icon="@android:drawable/ic_menu_edit"
         android:title="Account"
         android:tooltipText="다운로드"
         app:showAsAction="always" />
