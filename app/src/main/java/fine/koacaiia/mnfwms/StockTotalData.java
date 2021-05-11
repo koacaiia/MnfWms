@@ -46,14 +46,19 @@ public class StockTotalData extends AppCompatActivity {
         ValueEventListener listener= new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int cbm=0;
                 for(DataSnapshot data:snapshot.getChildren()){
                     MnfStockList mList=data.getValue(MnfStockList.class);
                     list.add(mList);
                 }
-                int cbm=0;
-                for(int i=0;i<list.size();i++){
 
+                for(int i=0;i<list.size();i++){
+//                    int day=Integer.parseInt(list.get(i).getTotalDate());
+                    cbm=cbm+Integer.parseInt(list.get(i).getTotalCbm());
                 }
+                Double cbmAvg=(double)(cbm/list.size());
+                String sCbmAvg=String.valueOf(cbmAvg);
+                txtResult.setText("평균:"+sCbmAvg+" CBM");
                 adapter.notifyDataSetChanged();
             }
 
