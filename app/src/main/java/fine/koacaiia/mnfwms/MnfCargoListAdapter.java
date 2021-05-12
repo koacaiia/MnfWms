@@ -1,5 +1,7 @@
 package fine.koacaiia.mnfwms;
 
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,10 @@ import java.util.ArrayList;
 
 public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapter.ListViewHolder> {
     ArrayList<MnfCargoList> list;
+
+    public MnfCargoListAdapter(ArrayList<MnfCargoList> list) {
+        this.list=list;
+    }
 
     public interface itemClicked{
         void itemOnClick(ListViewHolder listviewholder,View v,int pos);
@@ -41,6 +47,15 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
         holder.qty.setText(list.get(position).getQty());
         holder.location.setText(list.get(position).getLocation());
 
+        String remarked=list.get(position).getRemark();
+        Log.i("duatjsrb","getRemarked:"+remarked);
+       if(remarked==null||remarked.equals("반입 예정")){
+           holder.itemView.setBackgroundColor(Color.DKGRAY);
+       }else if(remarked.equals("수입신고 수리 완료")){
+            holder.itemView.setBackgroundColor(Color.WHITE);
+       }else{
+           holder.itemView.setBackgroundColor(Color.GRAY);
+       }
     }
 
     @Override

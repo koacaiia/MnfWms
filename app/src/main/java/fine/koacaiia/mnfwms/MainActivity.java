@@ -18,9 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -49,11 +47,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -67,10 +63,10 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     ArrayList<MnfCargoList> list;
     MnfCargoListAdapter adapter;
     FirebaseDatabase database;
-    TextView txtPlt;
-    TextView txtCbm;
-    TextView txtQty;
-    int intPlt,intCbm,intQty;
+    TextView txtPlt,txtPltBond,txtPltRe,txtPltCc;
+    TextView txtCbm,txtCbmBond,txtCbmRe,txtCbmCc;
+    TextView txtQty,txtQtyBond,txtQtyRe,txtQtyCc;
+    int intPlt,intCbm,intQty,intPltBond,intCbmBond,intQtyBond,intPltCc,intCbmCc,intQtyCc,intPltRe,intCbmRe,intQtyRe;
     ArrayList<String> desList;
 
     static private final String SHARE_NAME="SHARE_DEPOT";
@@ -83,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     String bl;
     String des;
     String date;
+    String remarkedItem;
 
     Button btnTitle;
     ArrayList<String> itemListBl;
@@ -131,13 +128,32 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         desList=new ArrayList<>();
         database=FirebaseDatabase.getInstance();
 //        putData();
-        getData();
+
+        if(getIntent().getStringExtra("Bl")!=null){
+            Log.i("duatjsrb","intent getBl:"+getIntent().getStringExtra("Bl"));
+            getDataSort("bl",getIntent().getStringExtra("Bl"));
+        }else{
+            getData();
+        }
+
         adapter=new MnfCargoListAdapter(list,this);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+
         txtPlt=findViewById(R.id.txtResultPlt);
+        txtPltBond=findViewById(R.id.txtPlt_bound);
+        txtPltCc=findViewById(R.id.txtPlt_customsClearance);
+        txtPltRe=findViewById(R.id.txtPlt_reserved);
+
         txtCbm=findViewById(R.id.txtResultCbm);
+        txtCbmBond=findViewById(R.id.txtCbm_bond);
+        txtCbmCc=findViewById(R.id.txtCbm_customsClearance);
+        txtCbmRe=findViewById(R.id.txtCbm_reserved);
+
         txtQty=findViewById(R.id.txtResultQty);
+        txtQtyBond=findViewById(R.id.txtQty_bond);
+        txtQtyCc=findViewById(R.id.txtQty_customsClearance);
+        txtQtyRe=findViewById(R.id.txtQty_reserved);
 
 
         date=new SimpleDateFormat("yyyy년MM월dd일").format(new Date());
@@ -168,10 +184,33 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         fltBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pushMessage("업무 변동사항 발생");
+                pushMessage("업무 변동사항 발생", "");
             }
         });
 
+
+    }
+
+    private void getDataSort(String order,String value) {
+        list.clear();
+        DatabaseReference databaseReference=database.getReference("MnF");
+        ValueEventListener listener=new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                for(DataSnapshot data:snapshot.getChildren()){
+                    MnfCargoList mList=data.getValue(MnfCargoList.class);
+                    list.add(mList);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        };
+        Query itemSortResult=databaseReference.orderByChild(order).equalTo(value);
+        itemSortResult.addListenerForSingleValueEvent(listener);
 
     }
 
@@ -372,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     }
 
     private void getData() {
-
+        list.clear();
         DatabaseReference databaseReference=database.getReference("MnF");
         ValueEventListener listener= new ValueEventListener() {
             @Override
@@ -390,14 +429,39 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 itemListDes=new ArrayList<>();
                 itemListProcess=new ArrayList<>();
                 itemListCount=new ArrayList<>();
+
+
                 int listSize=list.size();
                 intPlt=0;
+                intPltBond=0;
+                intPltCc=0;
+                intPltRe=0;
                 intCbm=0;
+                intCbmBond=0;
+                intCbmCc=0;
+                intCbmRe=0;
                 intQty=0;
+                intQtyBond=0;
+                intQtyCc=0;
+                intQtyRe=0;
+
                 for(int i=0;i<listSize;i++){
-                    intPlt=intPlt+Integer.parseInt(list.get(i).getPlt());
-                    intCbm=intCbm+Integer.parseInt(list.get(i).getCbm());
-                    intQty=intQty+Integer.parseInt(list.get(i).getQty());
+                    if(list.get(i).getRemark().equals("수입신고 수리 완료")){
+                        intPltCc=intPltCc+Integer.parseInt(list.get(i).getPlt());
+                        intCbmCc=intCbmCc+Integer.parseInt(list.get(i).getCbm());
+                        intQtyCc=intQty+Integer.parseInt(list.get(i).getQty());
+                    }else if(list.get(i).getRemark().equals("반입 예정")){
+                        intPltRe=intPltRe+Integer.parseInt(list.get(i).getPlt());
+                        intCbmRe=intCbmRe+Integer.parseInt(list.get(i).getCbm());
+                        intQtyRe=intQtyRe+Integer.parseInt(list.get(i).getQty());
+                    }else{
+                        intPltBond=intPltBond+Integer.parseInt(list.get(i).getPlt());
+                        intCbmBond=intCbmBond+Integer.parseInt(list.get(i).getCbm());
+                        intQtyBond=intQtyBond+Integer.parseInt(list.get(i).getQty());
+                    }
+                    intPlt=intPltCc+intPltBond;
+                    intCbm=intCbmCc+intCbmBond;
+                    intQty=intQtyCc+intQtyBond;
                     des.add(list.get(i).getDes());
 //                    Log.i("koacaiia","Des Add Value+++:"+list.get(i).getDes()+"Des List size"+list.size());
                     if(!des.contains(list.get(i).getDes())){
@@ -411,8 +475,19 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 }
 
                 txtPlt.setText(String.valueOf(intPlt)+" PLT");
+                txtPltBond.setText(intPltBond+" PLT");
+                txtPltCc.setText(intPltCc+" PLt");
+                txtPltRe.setText(intPltRe+" PLT");
+
                 txtCbm.setText(String.valueOf(intCbm)+" CBM");
+                txtCbmBond.setText(intCbmBond+" CBM");
+                txtCbmCc.setText(intCbmCc+" CBM");
+                txtCbmRe.setText(intCbmRe+" CBM");
+
                 txtQty.setText(String.valueOf(intQty));
+                txtQtyBond.setText(String.valueOf(intQtyBond));
+                txtQtyCc.setText(String.valueOf(intQtyCc));
+                txtQtyRe.setText(String.valueOf(intQtyRe));
                 String toDay=new SimpleDateFormat("yyyy년MM월dd일").format(new Date());
                 DatabaseReference dataReference=database.getReference("MnF&StockTotal/"+toDay);
                 MnfStockList mnfStockList=new MnfStockList(toDay,String.valueOf(intPlt),String.valueOf(intCbm));
@@ -492,16 +567,17 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
     private void webview(String bl) {
         Intent intent=new Intent(MainActivity.this,WebList.class);
-        intent.putExtra("bl",bl);
+        intent.putExtra("Bl",bl);
         intent.putExtra("des",des);
         startActivity(intent);
     }
 
     private void putRegistName() {
         ArrayList<String> arrListDepotName=new ArrayList<>();
+        arrListDepotName.add("FineTrading");
         arrListDepotName.add("ComanFood");
         arrListDepotName.add("M&F");
-        arrListDepotName.add("FineTrading");
+
 
         String[] arrDepotName=arrListDepotName.toArray(new String[arrListDepotName.size()]);
         View view=getLayoutInflater().inflate(R.layout.user_reg,null);
@@ -582,9 +658,12 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
     public void alertFine(MnfCargoList mnfCargoList){
         ArrayList<String> arrListFine=new ArrayList<>();
+        arrListFine.add("반입 예정");
+        arrListFine.add("화물검수 완료,반입진행 요청");
         arrListFine.add("보세화물 반입 진행");
         arrListFine.add("식약처 검채 확인");
         arrListFine.add("수입신고 검사 확인");
+        arrListFine.add("수입신고 수리 완료");
         String[] arrFine = arrListFine.toArray(new String[arrListFine.size()]);
         String finePath=
                 "MnF/"+mnfCargoList.getDate()+"_"+mnfCargoList.getBl()+"_"+mnfCargoList.getDes()+"_"+mnfCargoList.getCount();
@@ -598,18 +677,19 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 .setSingleChoiceItems(arrFine,0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                          itemName[0] =arrFine[which];
+                          remarkedItem =arrFine[which];
                     }
                 })
                 .setPositiveButton("Share", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                             DatabaseReference databaseReference=database.getReference(finePath);
-                            mnfCargoList.setRemark(itemName[0]);
+                            mnfCargoList.setRemark(remarkedItem);
                             databaseReference.setValue(mnfCargoList);
                             getData();
                             String updateTime=new SimpleDateFormat("MM월dd일HH시mm분").format(new Date());
-                            pushMessage(cargoInfo+"\n"+updateTime+"에"+"\n"+itemName[0]+"으로 진행상황 Updated 되었습니다.!");
+                            pushMessage(cargoInfo+"\n"+updateTime+"에"+"\n"+remarkedItem+"으로 진행상황 Updated 되었습니다.!",
+                                    mnfCargoList.getBl());
                     }
                 })
                 .show();
@@ -618,9 +698,10 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     }
     public void selectDialog(){
         ArrayList<String> arrListDepotName=new ArrayList<>();
+        arrListDepotName.add("FineTrading");
         arrListDepotName.add("ComanFood");
         arrListDepotName.add("M&F");
-        arrListDepotName.add("FineTrading");
+
 
         String[] arrDepotName=arrListDepotName.toArray(new String[arrListDepotName.size()]);
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
@@ -671,13 +752,14 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         });
     }
 
-    public void pushMessage(String message){
+    public void pushMessage(String message, String bl){
         JSONObject requestData=new JSONObject();
         try{
             requestData.put("priority","high");
             JSONObject dataOBJ=new JSONObject();
             dataOBJ.put("content",message);
             dataOBJ.put("depotName",depotName);
+            dataOBJ.put("Bl",bl);
 
 
             requestData.put("data",dataOBJ);

@@ -29,26 +29,34 @@ public class FcmProcessService extends FirebaseMessagingService{
         Map<String,String> data=remoteMessage.getData();
         String contents=data.get("content");
         String depotName=data.get("depotName");
+        String Bl=data.get("Bl");
 
-       notificationMessage(depotName,contents);
+       notificationMessage(depotName,contents,Bl);
 
     }
 
-    private void notificationMessage(String nickName, String contents) {
-        Intent intent=new Intent(this,MainActivity.class);
+    private void notificationMessage(String nickName, String contents, String bl) {
+        Intent intent=new Intent(this,WebList.class);
+        intent.putExtra("Bl",bl);
         PendingIntent contentIntent=PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_CANCEL_CURRENT);
-        NotificationCompat.Builder builder=getNotificationBuilder("Ask","Alert")
+        Intent mIntent=new Intent(this,MainActivity.class);
+        mIntent.putExtra("Bl",bl);
+        PendingIntent mContentIntent=PendingIntent.getActivity(this,0,mIntent,PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Builder builder=getNotificationBuilder(nickName,bl)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setContentTitle(nickName)
                 .setContentText(contents)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(contents))
-                .setContentIntent(contentIntent)
+                .setContentIntent(mContentIntent)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .addAction(R.mipmap.ic_launcher,"Confirm",contentIntent)
                 .setAutoCancel(true);
 
         NotificationManager notificationManager=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0,builder.build());
+        String notificationChannelId=bl.substring(bl.length()-4);
+        Log.i("duatjsrb",notificationChannelId);
+
+        notificationManager.notify(Integer.parseInt(notificationChannelId),builder.build());
 
     }
 
