@@ -1,5 +1,6 @@
 package fine.koacaiia.mnfwms;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,15 @@ public class MnfStockListAdapter extends RecyclerView.Adapter<MnfStockListAdapte
         holder.date.setText(list.get(position).getTotalDate());
         holder.plt.setText(list.get(position).getTotalPlt()+" PLT");
         holder.cbm.setText(list.get(position).getTotalCbm()+" CBM");
+        int iCbm=Integer.parseInt(list.get(position).getTotalCbm());
+
+        if(iCbm<1700){
+            holder.cbm.setTextColor(Color.RED);
+        }else if(iCbm>2100){
+            holder.cbm.setTextColor(Color.BLUE);
+        }else{
+            holder.cbm.setTextColor(Color.BLACK);
+        }
 
     }
 

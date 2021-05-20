@@ -54,6 +54,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +62,10 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements MnfCargoListAdapter.itemClicked {
     RecyclerView recyclerView;
     ArrayList<MnfCargoList> list;
+    ArrayList<MnfStockList> lists;
+    ArrayList<MnfRemarkList> listRemark;
     MnfCargoListAdapter adapter;
+    MnfStockListAdapter mAdapter;
     FirebaseDatabase database;
     TextView txtPlt,txtPltBond,txtPltRe,txtPltCc;
     TextView txtCbm,txtCbmBond,txtCbmRe,txtCbmCc;
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
     String des;
     String date;
     String remarkedItem;
+
 
     Button btnTitle;
     ArrayList<String> itemListBl;
@@ -103,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
             Manifest.permission.USE_FULL_SCREEN_INTENT,
             Manifest.permission.ANSWER_PHONE_CALLS,
     };
+
+    int dateSince;
+    int dateSinced;
     static String regId="cfAZNLWbSMSfSWnt-ptg1_:APA91bFOixRWpzvGiQFrjVJN7XcCu5brIRXjdhBVBYJ8f8bXWoMHoueyTYk-zDMggQkldkn2F7ML5_TCuK1Fc9Kv8zjlNjL4d4rOy5ntGSQ5PWAWNOfz_7lBDE1iwcTewmlCaAifbXze";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,20 +128,26 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         }
 
 
-        FirebaseMessaging.getInstance().subscribeToTopic("Fine");
+        FirebaseMessaging.getInstance().subscribeToTopic("Test");
         recyclerView=findViewById(R.id.recyclerView);
         LinearLayoutManager manager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         list=new ArrayList<>();
+        lists=new ArrayList<>();
         desList=new ArrayList<>();
         database=FirebaseDatabase.getInstance();
+
 //        putData();
+        getRemarkListItems();
 
         if(getIntent().getStringExtra("Bl")!=null){
             Log.i("duatjsrb","intent getBl:"+getIntent().getStringExtra("Bl"));
             getDataSort("bl",getIntent().getStringExtra("Bl"));
         }else{
+
             getData();
+
+            Log.i("duatjsrb","List Size++++:"+list.size());
         }
 
         adapter=new MnfCargoListAdapter(list,this);
@@ -172,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
             @Override
             public boolean onLongClick(View v) {
                 getData();
+//                getRemarkListItems();
                 Toast.makeText(getApplicationContext(),"화물정보를 초기화 합니다.",Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -180,14 +195,51 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
             requestQueue= Volley.newRequestQueue(getApplicationContext());
         }
 
-        fltBtn=findViewById(R.id.floatingActionButton);
-        fltBtn.setOnClickListener(new View.OnClickListener() {
+//        fltBtn=findViewById(R.id.floatingActionButton);
+//        fltBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                pushMessage("업무 변동사항 발생", "200589");
+//            }
+//        });
+
+
+    }
+
+    private void getDateSince() {
+
+        lists.clear();
+
+        DatabaseReference databaseReference=database.getReference("MnF&StockTotal");
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                pushMessage("업무 변동사항 발생", "");
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                for(DataSnapshot data:snapshot.getChildren()){
+                    MnfStockList mList=data.getValue(MnfStockList.class);
+                    lists.add(mList);
+                }
+               dateSinced =lists.get(lists.size()-1).getUntilDate();
+
+//                dateSince=lists.get(lists.size()-1).getUntilDate();
+//                mAdapter.notifyDataSetChanged();
+//                String strDateSince;
+//                Log.i("duatjsrb","dateSince:"+dateSince+"lists size:"+lists.size());
+                transferDated(dateSinced);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
             }
         });
+        Log.i("duatjsrb","Return Value:"+dateSince+"Return Values+++:");
 
+    }
+
+    private void transferDated(int dateSinced) {
+        this.dateSince=dateSinced;
+
+        dateSince=untilDate()-dateSinced;
 
     }
 
@@ -213,36 +265,6 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         itemSortResult.addListenerForSingleValueEvent(listener);
 
     }
-
-    public void exerciseAlertMessage() {
-       Intent intent=new Intent(this,MainActivity.class);
-       PendingIntent contentIntent=PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-       NotificationCompat.Builder builder=getNotificationBuilder("Ask","Alert")
-               .setSmallIcon(R.mipmap.ic_launcher)
-               .setContentTitle(depotName)
-               .setContentText("업무변동사항 발생")
-               .setContentIntent(contentIntent)
-               .setDefaults(Notification.DEFAULT_ALL)
-               .setAutoCancel(true);
-       NotificationManager notificationManager=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-       notificationManager.notify(0,builder.build());
-
-    }
-
-   public NotificationCompat.Builder getNotificationBuilder(String ask, String alert) {
-        NotificationCompat.Builder builder=null;
-        NotificationManager manager=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        NotificationChannel channel=new NotificationChannel(ask,alert,NotificationManager.IMPORTANCE_HIGH);
-        channel.enableLights(true);
-        channel.setLightColor(Color.RED);
-        channel.enableVibration(true);
-
-        manager.createNotificationChannel(channel);
-        builder=new NotificationCompat.Builder(this,ask);
-        return builder;
-    }
-
     private void alertSearch() {
         ArrayList<String> itemSearch=new ArrayList<>();
         itemSearch.add("B/L 별 조회");
@@ -359,34 +381,6 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
     }
 
-    private void alertSearchBl() {
-
-        String[] getSpinnerItemList=itemListBl.toArray(new String[itemListBl.size()] );
-        View view=getLayoutInflater().inflate(R.layout.sort_itemprocess_simple,null);
-        Spinner spinner=view.findViewById(R.id.spinner_simple);
-        ArrayAdapter<String> searchConditionAdapter=new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item
-                ,getSpinnerItemList);
-        spinner.setAdapter(searchConditionAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(),getSpinnerItemList[position],Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        Button btnSearch_simple=view.findViewById(R.id.btnSearch_simple);
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("B/L 별 조회")
-                .setView(view)
-                .show();
-
-    }
 
     private void alertSearchDate(){
 
@@ -420,9 +414,18 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 for(DataSnapshot data:snapshot.getChildren()){
 
                     MnfCargoList mList=data.getValue(MnfCargoList.class);
-                    if(!mList.getQty().equals("0")){
-                        list.add(mList);
-                         }
+                   String cbmGet = mList.getCbm();
+                   Log.i("duatjsrb","GetCbm:"+mList.getCbm());
+                   if(cbmGet==null){
+                       String name= data.getKey();
+                       DatabaseReference updateRemarkItems=database.getReference("MnF/"+name);//
+                       updateRemarkItems.setValue(null);
+                   }else{
+                       if(!cbmGet.equals("0")){
+                           list.add(mList);
+                       }
+                   }
+
                     }
 
                 itemListBl=new ArrayList<>();
@@ -484,14 +487,64 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 txtCbmCc.setText(intCbmCc+" CBM");
                 txtCbmRe.setText(intCbmRe+" CBM");
 
+                Double dQty=Double.valueOf(intCbm);
+                Double dQtyAvgCc=(Double)(intCbmCc/dQty)*100;
+                String sQtyAvgCc=String.format("%.2f",dQtyAvgCc);
+                Double dQtyBond=100-dQtyAvgCc;
+                String sQtyBond=String.format("%.2f",dQtyBond);
                 txtQty.setText(String.valueOf(intQty));
-                txtQtyBond.setText(String.valueOf(intQtyBond));
-                txtQtyCc.setText(String.valueOf(intQtyCc));
+                txtQtyBond.setText(sQtyBond+"%");
+                txtQtyCc.setText(sQtyAvgCc+"%");
                 txtQtyRe.setText(String.valueOf(intQtyRe));
                 String toDay=new SimpleDateFormat("yyyy년MM월dd일").format(new Date());
-                DatabaseReference dataReference=database.getReference("MnF&StockTotal/"+toDay);
-                MnfStockList mnfStockList=new MnfStockList(toDay,String.valueOf(intPlt),String.valueOf(intCbm));
-                dataReference.setValue(mnfStockList);
+
+
+                DatabaseReference untilRef=database.getReference("MnF&StockTotal");
+                untilRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                      for(DataSnapshot data:snapshot.getChildren()){
+                          MnfStockList uList=data.getValue(MnfStockList.class);
+                          lists.add(uList);
+                      }
+                      int uDate=lists.get(lists.size()-1).getUntilDate();
+                      Log.i("duatjsrb","uDate Value:"+uDate+"originalDate"+lists.get(lists.size()-1).getTotalDate()+"unTilDate " +
+                              "Value:::"+untilDate());
+                      dateSince=untilDate()-uDate;
+                        if(dateSince>1){
+
+                            for(int i=0;i<=dateSince;i++){
+                                Log.i("duatjsrb","for Count:"+dateSince+"i Value"+i);
+                                Date today=new Date();
+                                Calendar cal=Calendar.getInstance();
+                                cal.setTime(today);
+                                cal.add(Calendar.DATE,-i);
+                                Date untilDate=new Date(cal.getTimeInMillis());
+                                String untilToDay=new SimpleDateFormat("yyyy년MM월dd일").format(untilDate);
+                                MnfStockList mnfStockList=new MnfStockList(untilToDay,String.valueOf(intPlt),String.valueOf(intCbm),
+                                        untilDate()-i);
+                                DatabaseReference dataReference=database.getReference("MnF&StockTotal/"+untilToDay);
+                                dataReference.setValue(mnfStockList);
+                            }
+
+                            Log.i("duatjsrb","Dated until Message:"+dateSince);
+                        }else{
+                            Log.i("duatjsrb","Dated until Message:"+dateSince);
+                            DatabaseReference dataReference=database.getReference("MnF&StockTotal/"+toDay);
+                            MnfStockList mnfStockList=new MnfStockList(toDay,String.valueOf(intPlt),String.valueOf(intCbm),untilDate());
+                            dataReference.setValue(mnfStockList);
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+                    }
+                });
+
+
+
 
                 adapter.notifyDataSetChanged();
             }
@@ -667,6 +720,9 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
         String[] arrFine = arrListFine.toArray(new String[arrListFine.size()]);
         String finePath=
                 "MnF/"+mnfCargoList.getDate()+"_"+mnfCargoList.getBl()+"_"+mnfCargoList.getDes()+"_"+mnfCargoList.getCount();
+        String finePathRemark=
+                "MnFRemark/"+mnfCargoList.getDate()+"_"+mnfCargoList.getBl()+"_"+mnfCargoList.getDes()
+                +"_"+mnfCargoList.getCount();
         final String[] itemName = new String[1];
         String cargoBl="Bl:"+mnfCargoList.getBl();
         String count="찻수:"+mnfCargoList.getCount();
@@ -683,45 +739,27 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 .setPositiveButton("Share", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        String updateTime=new SimpleDateFormat("MM월dd일HH시mm분").format(new Date());
+                        pushMessage(cargoInfo+"\n"+updateTime+"에"+"\n"+remarkedItem+"으로 진행상황 Updated 되었습니다.!",
+                                mnfCargoList.getBl());
+
+                            DatabaseReference remarkDatabaseReference=database.getReference(finePathRemark);
                             DatabaseReference databaseReference=database.getReference(finePath);
                             mnfCargoList.setRemark(remarkedItem);
+
+                        MnfRemarkList mnfRemarkList=new MnfRemarkList(mnfCargoList.getDate(),mnfCargoList.getBl(),
+                                mnfCargoList.getDes(),mnfCargoList.getCount(),remarkedItem);
+//                         mnfRemarkList.setRemark(remarkedItem);
                             databaseReference.setValue(mnfCargoList);
+
+                        remarkDatabaseReference.setValue(mnfRemarkList);
                             getData();
-                            String updateTime=new SimpleDateFormat("MM월dd일HH시mm분").format(new Date());
-                            pushMessage(cargoInfo+"\n"+updateTime+"에"+"\n"+remarkedItem+"으로 진행상황 Updated 되었습니다.!",
-                                    mnfCargoList.getBl());
+
                     }
                 })
                 .show();
 
 
-    }
-    public void selectDialog(){
-        ArrayList<String> arrListDepotName=new ArrayList<>();
-        arrListDepotName.add("FineTrading");
-        arrListDepotName.add("ComanFood");
-        arrListDepotName.add("M&F");
-
-
-        String[] arrDepotName=arrListDepotName.toArray(new String[arrListDepotName.size()]);
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setSingleChoiceItems(arrDepotName,0, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String depotName=arrDepotName[which];
-                String depotNameSortArrayList=arrListDepotName.get(which);
-                Log.i("koacaiia","depotNameSortArrayList"+depotNameSortArrayList);
-                switch(depotName){
-//                    case "ComanFood":
-//                        alertComan(mnfCargoList);
-//                        break;
-//                    case "FineTrading":
-//                        alertFine(mnfCargoList);
-//                        break;
-                }
-            }
-        })
-                .show();
     }
 
     public void datePickerResult(String date){
@@ -763,7 +801,7 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
 
 
             requestData.put("data",dataOBJ);
-            requestData.put("to","/topics/Fine");
+            requestData.put("to","/topics/Test");
 
         }catch(Exception e){
             e.printStackTrace();
@@ -847,6 +885,58 @@ public class MainActivity extends AppCompatActivity implements MnfCargoListAdapt
                 return;
             }
         }
+
+    }
+
+    public void getRemarkListItems(){
+        listRemark=new ArrayList<>();
+        DatabaseReference databaseReference=database.getReference("MnFRemark");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                for(DataSnapshot data:snapshot.getChildren()){
+                    MnfRemarkList mList=data.getValue(MnfRemarkList.class);
+                    String date=mList.getDate();
+                    String bl=mList.getBl();
+                    String des=mList.getDes();
+                    String count=mList.getCount();
+                    String remark=mList.getRemark();
+                    String referencePath="MnF/"+date+"_"+bl+"_"+des+"_"+count;
+                    DatabaseReference databasePutRemark=database.getReference(referencePath);
+
+//                    MnfCargoList mnfCargoList=new MnfCargoList();
+//                    mnfCargoList.setRemark(remark);
+//                    databasePutRemark.setValue("remark",remark);
+                   Map<String,Object> reMarkedItems=new HashMap<>();
+                   reMarkedItems.put("remark",remark);
+                   databasePutRemark.updateChildren(reMarkedItems);
+                    }
+              adapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
+//        getData();
+    }
+
+    public int untilDate(){
+        Date today=new Date();
+        Calendar cal= Calendar.getInstance();
+        cal.setTime(today);
+        Calendar cal2=Calendar.getInstance();
+        cal2.set(2020,00,01);
+        int count=0;
+        while(!cal2.after(cal)){
+            count++;
+            cal2.add(Calendar.DATE,1);
+
+        }
+        return count;
 
     }
 

@@ -5,9 +5,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -50,11 +52,21 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
         String remarked=list.get(position).getRemark();
         Log.i("duatjsrb","getRemarked:"+remarked);
        if(remarked==null||remarked.equals("반입 예정")){
-           holder.itemView.setBackgroundColor(Color.DKGRAY);
+           holder.bl.setTextColor(Color.WHITE);
+           holder.remark.setTextColor(Color.WHITE);
+           holder.date.setTextColor(Color.WHITE);
+           holder.count.setTextColor(Color.WHITE);
+           holder.des.setTextColor(Color.WHITE);
+           holder.plt.setTextColor(Color.WHITE);
+           holder.cbm.setTextColor(Color.WHITE);
+           holder.qty.setTextColor(Color.WHITE);
+           holder.location.setTextColor(Color.WHITE);
+           holder.cardView.setBackgroundColor(Color.BLACK);
        }else if(remarked.equals("수입신고 수리 완료")){
-            holder.itemView.setBackgroundColor(Color.WHITE);
+            holder.cardView.setBackgroundColor(Color.WHITE);
        }else{
-           holder.itemView.setBackgroundColor(Color.GRAY);
+//           holder.itemView.setBackgroundColor(Color.GRAY);
+           holder.cardView.setBackgroundColor(Color.rgb(204,204,204));
        }
     }
 
@@ -73,6 +85,7 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
         TextView cbm;
         TextView qty;
         TextView location;
+        LinearLayout cardView;
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
             this.bl=itemView.findViewById(R.id.txtBl);
@@ -84,6 +97,7 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
             this.cbm=itemView.findViewById(R.id.txtCbm);
             this.qty=itemView.findViewById(R.id.txtQty);
             this.location=itemView.findViewById(R.id.txtLocation);
+            this.cardView=itemView.findViewById(R.id.re_back);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

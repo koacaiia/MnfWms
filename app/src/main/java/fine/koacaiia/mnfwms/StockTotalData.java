@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -52,13 +53,24 @@ public class StockTotalData extends AppCompatActivity {
                     list.add(mList);
                 }
 
+
                 for(int i=0;i<list.size();i++){
 //                    int day=Integer.parseInt(list.get(i).getTotalDate());
+                    int dayNow;
+                    int dayYes;
+                    int monthNow;
+                    int monthYes;
+                    if(i>0){
+                        String dateNow=list.get(i).getTotalDate();
+                        String dateYesterDay=list.get(i-1).getTotalDate();
+                    }
+
                     cbm=cbm+Integer.parseInt(list.get(i).getTotalCbm());
                 }
                 Double cbmAvg=(double)(cbm/list.size());
                 String sCbmAvg=String.valueOf(cbmAvg);
                 txtResult.setText("평균:"+sCbmAvg+" CBM");
+
                 adapter.notifyDataSetChanged();
             }
 

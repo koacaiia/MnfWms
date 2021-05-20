@@ -4,14 +4,16 @@ public class MnfStockList {
     String totalDate;
     String totalPlt;
     String totalCbm;
+    int untilDate;
 
     public MnfStockList(){
 
     }
-    public MnfStockList(String totalDate,String totalPlt,String totalCbm){
+    public MnfStockList(String totalDate,String totalPlt,String totalCbm,int untilDate){
         this.totalDate=totalDate;
         this.totalPlt=totalPlt;
         this.totalCbm=totalCbm;
+        this.untilDate=untilDate;
     }
 
     public String getTotalDate() {
@@ -36,5 +38,13 @@ public class MnfStockList {
 
     public void setTotalCbm(String totalCbm) {
         this.totalCbm = totalCbm;
+    }
+
+    public int getUntilDate() {
+        return untilDate;
+    }
+
+    public void setUntilDate(int untilDate) {
+        this.untilDate = untilDate;
     }
 }

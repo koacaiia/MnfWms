@@ -6,20 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.88"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/recyclerView"
-        app:layout_constraintVertical_bias="0.78"
-        app:srcCompat="@android:drawable/ic_menu_search" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -33,7 +19,7 @@
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="250dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +30,7 @@
             android:id="@+id/btn_title"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="0.98"
             android:gravity="center"
             android:text="재고현황 화물조회"
             android:textStyle="bold|italic" />
@@ -102,7 +88,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="미통관 화물재고"
-                android:textSize="10sp"
+                android:textSize="8sp"
                 android:textStyle="bold|italic" />
 
             <TextView
@@ -178,7 +164,7 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <TextView
+            <Button
                 android:id="@+id/txtItem"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -186,6 +172,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="총재고"
+                android:textSize="10sp"
                 android:textStyle="bold|italic" />
 
             <TextView
