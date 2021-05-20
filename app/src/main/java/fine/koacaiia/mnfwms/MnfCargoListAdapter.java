@@ -44,13 +44,21 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
         holder.date.setText(list.get(position).getDate());
         holder.count.setText(list.get(position).getCount());
         holder.des.setText(list.get(position).getDes());
-        holder.plt.setText(list.get(position).getPlt());
-        holder.cbm.setText(list.get(position).getCbm());
-        holder.qty.setText(list.get(position).getQty());
+        holder.plt.setText(list.get(position).getPlt()+" Plt");
+        holder.cbm.setText(list.get(position).getCbm()+" Cbm");
+        holder.qty.setText(list.get(position).getQty()+" Ea");
         holder.location.setText(list.get(position).getLocation());
 
         String remarked=list.get(position).getRemark();
-        Log.i("duatjsrb","getRemarked:"+remarked);
+        holder.bl.setTextColor(Color.BLACK);
+        holder.remark.setTextColor(Color.BLACK);
+        holder.date.setTextColor(Color.BLACK);
+        holder.count.setTextColor(Color.BLACK);
+        holder.des.setTextColor(Color.BLACK);
+        holder.plt.setTextColor(Color.BLACK);
+        holder.cbm.setTextColor(Color.BLACK);
+        holder.qty.setTextColor(Color.BLACK);
+        holder.location.setTextColor(Color.BLACK);
        if(remarked==null||remarked.equals("반입 예정")){
            holder.bl.setTextColor(Color.WHITE);
            holder.remark.setTextColor(Color.WHITE);
@@ -65,7 +73,6 @@ public class MnfCargoListAdapter extends RecyclerView.Adapter<MnfCargoListAdapte
        }else if(remarked.equals("수입신고 수리 완료")){
             holder.cardView.setBackgroundColor(Color.WHITE);
        }else{
-//           holder.itemView.setBackgroundColor(Color.GRAY);
            holder.cardView.setBackgroundColor(Color.rgb(204,204,204));
        }
     }

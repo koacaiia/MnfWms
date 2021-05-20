@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +24,7 @@ public class StockTotalData extends AppCompatActivity {
     MnfStockListAdapter adapter;
     FirebaseDatabase database;
     TextView txtResult;
+    TextView txtMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,7 @@ public class StockTotalData extends AppCompatActivity {
         adapter.notifyDataSetChanged();
 
         txtResult=findViewById(R.id.txtResult);
+        txtMonth=findViewById(R.id.textView2);
     }
 
     private void getData() {
@@ -53,23 +56,16 @@ public class StockTotalData extends AppCompatActivity {
                     list.add(mList);
                 }
 
+                String month=list.get(list.size()-1).getTotalDate().substring(5,7);
+                Log.i("duatjsrb","Month Value:"+month);
 
                 for(int i=0;i<list.size();i++){
-//                    int day=Integer.parseInt(list.get(i).getTotalDate());
-                    int dayNow;
-                    int dayYes;
-                    int monthNow;
-                    int monthYes;
-                    if(i>0){
-                        String dateNow=list.get(i).getTotalDate();
-                        String dateYesterDay=list.get(i-1).getTotalDate();
-                    }
-
-                    cbm=cbm+Integer.parseInt(list.get(i).getTotalCbm());
+                 cbm=cbm+Integer.parseInt(list.get(i).getTotalCbm());
                 }
                 Double cbmAvg=(double)(cbm/list.size());
                 String sCbmAvg=String.valueOf(cbmAvg);
                 txtResult.setText("평균:"+sCbmAvg+" CBM");
+                txtMonth.setText(month+"월 ");
 
                 adapter.notifyDataSetChanged();
             }
